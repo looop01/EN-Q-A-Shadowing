@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KIOFF Interview Shadowing</title>
+<style>
+  :root{
+    --ink:#1c1b19;
+    --paper:#f6f3ec;
+    --film:#2b2a28;
+    --reel:#c44d34;
+    --reel-dim:#e9c7bb;
+    --line:#d8d2c4;
+    --gold:#a8854f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Courier New', monospace;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+  .masthead{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-bottom:3px solid var(--film);
+    padding-bottom:10px;
+    margin-bottom:18px;
+  }
+  .masthead h1{
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:22px;
+    letter-spacing:0.5px;
+    margin:0;
+    font-weight:700;
+  }
+  .masthead .sub{
+    font-size:11px;
+    color:var(--gold);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  .section-nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:18px;
+  }
+  .section-nav button{
+    font-family:'Courier New', monospace;
+    font-size:11px;
+    padding:6px 9px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    border-radius:2px;
+  }
+  .section-nav button.active{
+    background:var(--film);
+    color:var(--paper);
+    border-color:var(--film);
+  }
+  .stage{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:6px;
+    background:repeating-linear-gradient(90deg, var(--film) 0 10px, transparent 10px 16px);
+    opacity:0.5;
+  }
+  .qa-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--gold);
+    margin-bottom:8px;
+    min-height:14px;
+  }
+  .sentence-display{
+    font-family:Georgia, serif;
+    font-size:20px;
+    line-height:1.55;
+    color:var(--ink);
+    min-height:90px;
+    margin-bottom:10px;
+  }
+  .note{
+    font-size:12.5px;
+    color:#6b675c;
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+    min-height:18px;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+  }
+  .progress-bar{
+    flex:1;
+    height:5px;
+    background:var(--line);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--reel);
+    width:0%;
+    transition:width 0.2s;
+  }
+  .progress-text{
+    font-size:11px;
+    color:#6b675c;
+    white-space:nowrap;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:18px;
+  }
+  .controls button{
+    font-family:'Courier New', monospace;
+    font-size:13px;
+    padding:10px 14px;
+    border:none;
+    border-radius:3px;
+    cursor:pointer;
+    background:var(--film);
+    color:var(--paper);
+  }
+  .controls button.primary{
+    background:var(--reel);
+  }
+  .controls button:disabled{
+    opacity:0.4;
+    cursor:default;
+  }
+  .controls button.ghost{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .rate-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+    font-size:12px;
+  }
+  .rate-row input[type=range]{
+    flex:1;
+    accent-color:var(--reel);
+  }
+  .rate-value{
+    width:38px;
+    text-align:right;
+    color:var(--reel);
+    font-weight:bold;
+  }
+  .mode-row{
+    display:flex;
+    gap:14px;
+    margin-top:14px;
+    font-size:12px;
+  }
+  .mode-row label{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    cursor:pointer;
+  }
+  .sentence-list{
+    margin-top:22px;
+  }
+  .sentence-list h3{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--gold);
+    margin:0 0 8px;
+  }
+  .sentence-item{
+    font-size:13.5px;
+    line-height:1.5;
+    padding:7px 8px;
+    border-radius:2px;
+    cursor:pointer;
+    color:#494539;
+  }
+  .sentence-item:hover{
+    background:#fbf8f2;
+  }
+  .sentence-item.current{
+    background:var(--reel-dim);
+    color:var(--ink);
+    font-weight:bold;
+  }
+  .voice-row{
+    margin-top:14px;
+    font-size:11px;
+    color:#6b675c;
+  }
+  select{
+    font-family:'Courier New', monospace;
+    font-size:11px;
+    padding:3px;
+  }
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:#a39c8c;
+    margin-top:30px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>SHADOWING REEL</h1>
+    <div class="sub">KIOFF Q&amp;A Script</div>
+  </div>
+
+  <div class="section-nav" id="sectionNav"></div>
+
+  <div class="stage">
+    <div class="qa-label" id="qaLabel">&nbsp;</div>
+    <div class="sentence-display" id="sentenceDisplay">Press Play to begin</div>
+    <div class="note" id="noteDisplay">&nbsp;</div>
+
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 0</div>
+    </div>
+
+    <div class="controls">
+      <button class="ghost" id="prevBtn">&larr; Prev</button>
+      <button class="primary" id="playBtn">▶ Play</button>
+      <button class="ghost" id="repeatBtn">↻ Repeat</button>
+      <button class="ghost" id="nextBtn">Next &rarr;</button>
+    </div>
+
+    <div class="rate-row">
+      <span>Speed</span>
+      <input type="range" id="rateSlider" min="0.5" max="1.2" step="0.05" value="0.85">
+      <span class="rate-value" id="rateValue">0.85x</span>
+    </div>
+
+    <div class="mode-row">
+      <label><input type="radio" name="mode" value="single" checked> Sentence-by-sentence</label>
+      <label><input type="radio" name="mode" value="auto"> Auto-advance</label>
+      <label><input type="checkbox" id="pauseToggle" checked> Pause for shadowing (3s)</label>
+    </div>
+
+    <div class="voice-row">
+      Voice:
+      <select id="voiceSelect"></select>
+    </div>
+  </div>
+
+  <div class="sentence-list" id="sentenceList">
+    <h3>All Lines (click to jump)</h3>
+    <div id="listInner"></div>
+  </div>
+
+  <footer>Built-in browser speech synthesis — quality varies by device/browser. Best in Chrome.</footer>
+</div>
+
+<script>
+const sections = [
+{
+  title: "0. Self-Intro",
+  qa: null,
+  lines: [
+    ["I'm Daisuke Abe, a director based in Tokyo.", ""],
+    ["My latest film follows Yasuaki Kagii — an underwater photographer who calls himself a 'trash-picking uncle.'", "underwater → アンダーウォーター、tの脱落に注意"],
+    ["He collects marine debris from Japan's coastlines and projects his own underwater footage onto it.", "debris → 「デブリー」、sは発音しない"],
+    ["The film is called The Signals of Color.", ""],
+    ["It's screening here at KIOFF.", "screening → ngを鼻にしっかり残す"]
+  ]
+},
+{
+  title: "1. About the Work",
+  qa: null,
+  lines: [
+    ["What drew me to Kagii was that he doesn't frame what he does as activism.", "drewを強く、toは弱く"],
+    ["He just dives, picks up trash, and turns it into something beautiful.", ""],
+    ["I didn't want to make a film that argued a point — I wanted it to feel like a sensory experience.", "sensory /ˈsensəri/"],
+    ["That's why I shot entirely on vintage lenses.", ""],
+    ["The imperfection of the glass felt closer to what he's actually doing — finding value in what's been discarded.", ""]
+  ]
+},
+{
+  title: "2. To Productions",
+  qa: null,
+  lines: [
+    ["I'm currently looking to connect with international productions.", ""],
+    ["My commercial background is with Sony, Toyota, NEC — but what I'm really interested in is work that sits at the edge between documentary instinct and brand storytelling.", "at the のリンキングに注意"],
+    ["If you work with directors in that space, I'd love to stay in touch.", "I'd /aɪd/ をしっかり"]
+  ]
+},
+{
+  title: "3. Escape Hatch",
+  qa: null,
+  lines: [
+    ["What brought you to KIOFF this year?", ""]
+  ]
+},
+{
+  title: "4. Why This Topic",
+  qa: "Q: Why did you choose this topic? / What was the biggest challenge?",
+  lines: [
+    ["Global issues feel too big for one person.", ""],
+    ["So, I didn't wanna make a preachy documentary.", "wanna /ˈwɑnə/"],
+    ["I wanted to tell a beautiful epic, to share the feeling — not just the logic.", ""]
+  ]
+},
+{
+  title: "5. Camera & Lenses",
+  qa: "Q: The visuals are stunning. What kind of camera or lenses did you use?",
+  lines: [
+    ["I used Sony alpha one and alpha seven S three.", ""],
+    ["Usually, I choose vintage lenses based on the artistic intent, but for this film, I was a one-man crew traveling light.", "one-man crew = 一人体制 / traveling light = 軽装備で"],
+    ["My main lens was the Canon FL fifty-eight millimeter f one point two.", ""],
+    ["I also used the Nokton Classic thirty-five millimeter, Vivitar twenty-eight millimeter, and New FD eighty-five millimeter.", ""],
+    ["I did bring a two point eight zoom for backup — especially for the ocean scenes on small fishing boats where I needed weather sealing and flexibility.", "weather /ˈweðər/"],
+    ["Honestly, if I start talking about my lens collection, we'll be here all day! So I'll stop there.", "we'll be here のリンキング"]
+  ]
+},
+{
+  title: "6. Timeline",
+  qa: "Q: How long did it take to complete this project?",
+  lines: [
+    ["It's been about a year since the project started.", ""],
+    ["I joined the protagonist, Kagi-san, at four different locations across Japan to capture the right moments.", "protagonist /proʊˈtæɡənɪst/"],
+    ["The actual filming took six months, and editing took about three.", ""],
+    ["Since my main work is in advertising, I worked on this between projects.", ""],
+    ["If I focused only on editing, I could probably finish it in two weeks!", ""]
+  ]
+},
+{
+  title: "7. Sound Design",
+  qa: "Q: How did you approach the sound design?",
+  lines: [
+    ["I collaborated with my long-time partner, composer Tatsuya Yamada.", "collaborated /kəˈlæbəreɪtɪd/"],
+    ["For this film, we focused on music selection rather than original composition.", "rather than のリンキング"],
+    ["At first, I tried an Indie Rock vibe — you can hear it in the teaser — but I eventually chose a more calm and emotional tone for the final cut.", ""],
+    ["I used three main tracks, editing them to match the story's emotional shifts.", ""],
+    ["For sound effects, I kept it minimal.", ""],
+    ["I didn't want it to feel forced or preachy.", ""],
+    ["I only kept essential noises, like the car or recording sounds, to maintain a natural flow.", "essential の /ʃ/"]
+  ]
+},
+{
+  title: "8. Trust w/ Subject",
+  qa: "Q: How did you build trust with the subject?",
+  lines: [
+    ["I don't just listen during interviews.", ""],
+    ["I try to be vulnerable and show my true self.", "vulnerable /ˈvʌlnərəbəl/"],
+    ["It's more like a session than an interview.", ""],
+    ["If we resonate, the conversation goes much deeper.", "resonate /ˈrezəneɪt/"]
+  ]
+},
+{
+  title: "9. Next Project",
+  qa: "Q: What is your next project?",
+  lines: [
+    ["I have two main projects.", ""],
+    ["First, I'm expanding my series called mmm, which stands for Movie: Medium of Moments. This film is the second entry.", ""],
+    ["In Japan, we have a word, Setsuna. It's a Buddhist concept meaning the absolute moment that only exists now. I want to be the medium that captures these moments with cinematic emotion.", "Buddhist /ˈbʊdɪst/"],
+    ["The second is a sci-fi fiction film based on Maschinen Krieger. I want to use AI and CG to create something visually stunning with a deep, edgy philosophical story — something I can't always do in my commercial work!", "philosophical /ˌfɪləˈsɑːfɪkəl/"]
+  ]
+},
+{
+  title: "10. Takeaway",
+  qa: "Q: What is the one thing you want the audience to take away?",
+  lines: [
+    ["My takeaway is simple: Stop looking at others.", "takeaway /ˈteɪkəweɪ/"],
+    ["Just live exactly as you feel.", "exactly as のリンキング"]
+  ]
+}
+];
+
+let currentSection = 0;
+let currentLine = 0;
+let isPlaying = false;
+let voices = [];
+let autoTimer = null;
+
+const sectionNav = document.getElementById('sectionNav');
+const sentenceDisplay = document.getElementById('sentenceDisplay');
+const noteDisplay = document.getElementById('noteDisplay');
+const qaLabel = document.getElementById('qaLabel');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const playBtn = document.getElementById('playBtn');
+const rateSlider = document.getElementById('rateSlider');
+const rateValue = document.getElementById('rateValue');
+const voiceSelect = document.getElementById('voiceSelect');
+const listInner = document.getElementById('listInner');
+const pauseToggle = document.getElementById('pauseToggle');
+
+function buildNav(){
+  sectionNav.innerHTML = '';
+  sections.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.textContent = s.title;
+    b.className = i === currentSection ? 'active' : '';
+    b.onclick = () => { stopAll(); currentSection = i; currentLine = 0; render(); };
+    sectionNav.appendChild(b);
+  });
+}
+
+function buildList(){
+  listInner.innerHTML = '';
+  sections[currentSection].lines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'sentence-item' + (i === currentLine ? ' current' : '');
+    div.textContent = line[0];
+    div.onclick = () => { stopAll(); currentLine = i; render(); };
+    listInner.appendChild(div);
+  });
+}
+
+function render(){
+  buildNav();
+  const sec = sections[currentSection];
+  qaLabel.textContent = sec.qa || '';
+  const line = sec.lines[currentLine];
+  sentenceDisplay.textContent = line[0];
+  noteDisplay.textContent = line[1] || '\u00A0';
+  progressFill.style.width = ((currentLine+1)/sec.lines.length*100) + '%';
+  progressText.textContent = (currentLine+1) + ' / ' + sec.lines.length;
+  buildList();
+}
+
+function populateVoices(){
+  voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  voiceSelect.innerHTML = '';
+  if(voices.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Default';
+    voiceSelect.appendChild(opt);
+    return;
+  }
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    voiceSelect.appendChild(opt);
+  });
+  const preferred = voices.findIndex(v => /US|GB/.test(v.lang) && /Google|Natural|Samantha|Daniel/i.test(v.name));
+  if(preferred >= 0) voiceSelect.value = preferred;
+}
+speechSynthesis.onvoiceschanged = populateVoices;
+populateVoices();
+
+function speakCurrent(onEnd){
+  const sec = sections[currentSection];
+  const text = sec.lines[currentLine][0];
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = parseFloat(rateSlider.value);
+  if(voices.length > 0 && voiceSelect.value !== ''){
+    utter.voice = voices[parseInt(voiceSelect.value)];
+  }
+  utter.onend = () => {
+    if(onEnd) onEnd();
+  };
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+function stopAll(){
+  isPlaying = false;
+  speechSynthesis.cancel();
+  clearTimeout(autoTimer);
+  playBtn.textContent = '▶ Play';
+}
+
+function advance(){
+  const sec = sections[currentSection];
+  if(currentLine < sec.lines.length - 1){
+    currentLine++;
+    render();
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    if(mode === 'auto' && isPlaying){
+      playLoop();
+    }
+  } else {
+    stopAll();
+  }
+}
+
+function playLoop(){
+  render();
+  speakCurrent(() => {
+    if(!isPlaying) return;
+    const pauseMs = pauseToggle.checked ? 3000 : 400;
+    autoTimer = setTimeout(() => {
+      if(!isPlaying) return;
+      advance();
+    }, pauseMs);
+  });
+}
+
+playBtn.onclick = () => {
+  if(isPlaying){
+    stopAll();
+  } else {
+    isPlaying = true;
+    playBtn.textContent = '⏸ Stop';
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    if(mode === 'auto'){
+      playLoop();
+    } else {
+      speakCurrent(() => { isPlaying = false; playBtn.textContent = '▶ Play'; });
+    }
+  }
+};
+
+document.getElementById('repeatBtn').onclick = () => {
+  speechSynthesis.cancel();
+  speakCurrent();
+};
+
+document.getElementById('nextBtn').onclick = () => {
+  const wasAutoPlaying = isPlaying && document.querySelector('input[name="mode"]:checked').value === 'auto';
+  stopAll();
+  const sec = sections[currentSection];
+  if(currentLine < sec.lines.length - 1){
+    currentLine++;
+  }
+  render();
+  if(wasAutoPlaying){
+    isPlaying = true;
+    playBtn.textContent = '⏸ Stop';
+    playLoop();
+  } else {
+    isPlaying = true;
+    playBtn.textContent = '⏸ Stop';
+    speakCurrent(() => { isPlaying = false; playBtn.textContent = '▶ Play'; });
+  }
+};
+
+document.getElementById('prevBtn').onclick = () => {
+  const wasAutoPlaying = isPlaying && document.querySelector('input[name="mode"]:checked').value === 'auto';
+  stopAll();
+  if(currentLine > 0){
+    currentLine--;
+  }
+  render();
+  if(wasAutoPlaying){
+    isPlaying = true;
+    playBtn.textContent = '⏸ Stop';
+    playLoop();
+  } else {
+    isPlaying = true;
+    playBtn.textContent = '⏸ Stop';
+    speakCurrent(() => { isPlaying = false; playBtn.textContent = '▶ Play'; });
+  }
+};
+
+rateSlider.oninput = () => {
+  rateValue.textContent = rateSlider.value + 'x';
+};
+
+render();
+</script>
+</body>
+</html>

@@ -365,7 +365,7 @@
     <div class="mode-row">
       <label><input type="radio" name="mode" value="single" checked> Sentence-by-sentence</label>
       <label><input type="radio" name="mode" value="auto"> Auto-advance</label>
-      <label><input type="checkbox" id="pauseToggle" checked> Pause for shadowing (3s)</label>
+      <label><input type="checkbox" id="pauseToggle" checked> Pause for shadowing (auto-length)</label>
     </div>
 
     <div class="voice-row">
@@ -630,11 +630,29 @@ function advance(){
   }
 }
 
+function estimatePauseMs(text, rate){
+  // Rough speech-rate model: ~2.5 words/sec at rate=1.0
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const baseSecondsAtRate1 = wordCount / 2.5;
+  const speakSeconds = baseSecondsAtRate1 / rate;
+  // Give the user roughly the same amount of time as the line takes to say,
+  // plus a small buffer, clamped to a sensible range.
+  const pauseSeconds = speakSeconds * 1.15 + 0.6;
+  const clamped = Math.min(Math.max(pauseSeconds, 1.2), 9);
+  return Math.round(clamped * 1000);
+}
+
 function playLoop(){
   render();
   speakCurrent(() => {
     if(!isPlaying) return;
-    const pauseMs = pauseToggle.checked ? 3000 : 400;
+    let pauseMs = 400;
+    if(pauseToggle.checked){
+      const sec = sections[currentSection];
+      const text = sec.lines[currentLine][0];
+      const rate = parseFloat(rateSlider.value);
+      pauseMs = estimatePauseMs(text, rate);
+    }
     autoTimer = setTimeout(() => {
       if(!isPlaying) return;
       advance();

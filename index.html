@@ -358,8 +358,8 @@
 
     <div class="rate-row">
       <span>Speed</span>
-      <input type="range" id="rateSlider" min="0.5" max="1.2" step="0.05" value="0.85">
-      <span class="rate-value" id="rateValue">0.85x</span>
+      <input type="range" id="rateSlider" min="0.5" max="1.2" step="0.05" value="1.0">
+      <span class="rate-value" id="rateValue">1.0x</span>
     </div>
 
     <div class="mode-row">
@@ -551,11 +551,12 @@ function render(){
 }
 
 function populateVoices(){
-  voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  const all = speechSynthesis.getVoices();
+  voices = all.filter(v => v.lang.toLowerCase().startsWith('en'));
   voiceSelect.innerHTML = '';
   if(voices.length === 0){
     const opt = document.createElement('option');
-    opt.textContent = 'Default';
+    opt.textContent = 'Default (English)';
     voiceSelect.appendChild(opt);
     return;
   }
@@ -565,19 +566,31 @@ function populateVoices(){
     opt.textContent = v.name + ' (' + v.lang + ')';
     voiceSelect.appendChild(opt);
   });
-  const preferred = voices.findIndex(v => /US|GB/.test(v.lang) && /Google|Natural|Samantha|Daniel/i.test(v.name));
-  if(preferred >= 0) voiceSelect.value = preferred;
+  // Prefer US/GB natural-sounding voices; fall back to any en- voice
+  let preferred = voices.findIndex(v => /US|GB/i.test(v.lang) && /Google|Natural|Samantha|Daniel/i.test(v.name));
+  if(preferred < 0) preferred = voices.findIndex(v => /^en-US$/i.test(v.lang));
+  if(preferred < 0) preferred = voices.findIndex(v => /^en-GB$/i.test(v.lang));
+  if(preferred < 0) preferred = 0;
+  voiceSelect.value = preferred;
 }
 speechSynthesis.onvoiceschanged = populateVoices;
 populateVoices();
+// Some Android browsers populate voices asynchronously / late
+setTimeout(populateVoices, 300);
+setTimeout(populateVoices, 1000);
 
 function speakCurrent(onEnd){
   const sec = sections[currentSection];
   const text = sec.lines[currentLine][0];
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = parseFloat(rateSlider.value);
+  utter.lang = 'en-US';
   if(voices.length > 0 && voiceSelect.value !== ''){
-    utter.voice = voices[parseInt(voiceSelect.value)];
+    const v = voices[parseInt(voiceSelect.value)];
+    if(v){
+      utter.voice = v;
+      utter.lang = v.lang;
+    }
   }
   utter.onend = () => {
     if(onEnd) onEnd();
